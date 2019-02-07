@@ -1,17 +1,17 @@
-function gen_STcorr(Number_of_pairs)
+function initial_corr = gen_STcorr(c_desired) %Number_of_pairs,
 %   Divides numbers of trains by 10 and does sweep from 0-10, 11-20, 21-30
 %   etc. all the way up to 100% contamination.  Saves each train into
 %   folder for these to be analyzed for ISI violiations
 
 %UPDATE: Should save firing rate too
 
-if mod(Number_of_pairs,10)~=0
-    
-    Number_of_pairs= input('change to number divisible by 10')
-    
-end
+% if mod(Number_of_pairs,10)~=0
+%
+%     Number_of_pairs= input('change to number divisible by 10')
+%
+% end
 
-Train_in_group=Number_of_pairs/10;
+Train_in_group=1;%Number_of_pairs/10;
 
 contam_vec=[linspace(0,.1,Train_in_group)...
     linspace(.11,.20,Train_in_group)...
@@ -63,6 +63,7 @@ for iter=1:1 %Number_of_pairs
     
     NN = size(wav,3); % number of neurons %should be same as nn...curious why they did this again
     fr = fr_bounds(1) + (fr_bounds(2)-fr_bounds(1)) * rand(NN,1); % create variability in firing rates % uses uniform scale rather than shift 0 to diff between bounds
+    fr(1) = fr(2); %%%% ADDED
     
     spk_times = [];
     clu = [];
@@ -105,24 +106,52 @@ for iter=1:1 %Number_of_pairs
     fr_cm{2}=(ind_st_big(1)~=1)+1;
     fr_cm{4}=(numclu(numclu~=(ind_st_big(1)~=1)+1));
     
-    % want to start with spike trains of the same length
-    % take longer one and randomly sample to get to length of the shorter
-    % one
-    st_A = randsample(st_A, length(st_B), false);
-    st_A = sort(st_A);
+    %%
     
-    % now we have spike times of the sample length
-    % these are separated into st_A and st_B (two neurons, one per st) 
+    % need to rebin the spike times back into 1's and 0's 
+    % use time bins of width 1/fs 
     
-    % want to compute noise correlation or zero lag cross correlation
+%     dt = 1/fs; %time step -- too small (makes array too large for matlab)
+    dt = 1; % ms 
+    bin_edges = 0:dt:double(max(max(st_A), max(st_B))); 
+    binned_A = -1*ones(1, length(bin_edges)-1); % initialize to -1 so can tell when updated with counts 
+    binned_B = -1*ones(1, length(bin_edges)-1);
+    for i = 1:length(bin_edges) - 1
+        lower = bin_edges(i);
+        upper = bin_edges(i+1);
+        binned_A(i) = sum(st_A > lower & st_A <= upper);
+        binned_B(i) = sum(st_B > lower & st_B <= upper);
+    end 
     
-    %% correlation: 1) compute initial correlation 2) add more 3) recalculate correlation to check ?? 
+    binned_A = binned_A >= 1; %turn back into 1, 0
+    binned_B = binned_B >= 1;
+    
+    %% correlation: 1) compute initial correlation 2) add more 3) recalculate correlation to check ??
+    
+    % zeroth lag cross correlation - only one time bin
+    % xcorr
     
     max_lag = 50e-3;
     lag_units = max_lag/1e-3;
     
+    % want to compute noise correlation or zero lag cross correlation
+    
     initial_corr = xcorr(double(st_A), double(st_B), 0, 'coeff');
     
-    % zeroth lag cross correlation - only one time bin
-    % xcorr 
+    % below is started but not finished nor debugged
+%     while initial_corr ~= c_desired
+%         if initial_corr < c_desired % add correlation
+%             jitter = randn(1, length(st_B) - d);
+%             jitter = floor(max(diff(st_B)) * jitter);
+%             st_B = st_B + [jitter'; zeros(d)];
+%         elseif initial_corr > c_desired % remove correlation
+%             continue; % placeholder: TODO
+%         else % do nothing
+%             continue;
+%         end
+%         initial_corr = xcorr(double(st_A), double(st_B), 0, 'coeff');
+%     end
+%     % Save pair
+    
+end
 end
