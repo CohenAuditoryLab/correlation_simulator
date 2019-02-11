@@ -112,31 +112,30 @@ for iter=1:1 %Number_of_pairs
     % use time bins of width 1/fs 
     
 %     dt = 1/fs; %time step -- too small (makes array too large for matlab)
-    dt = 1; % ms 
+    dt = 5; % ms 
     bin_edges = 0:dt:double(max(max(st_A), max(st_B))); 
-    binned_A = -1*ones(1, length(bin_edges)-1); % initialize to -1 so can tell when updated with counts 
-    binned_B = -1*ones(1, length(bin_edges)-1);
-    for i = 1:length(bin_edges) - 1
-        lower = bin_edges(i);
-        upper = bin_edges(i+1);
-        binned_A(i) = sum(st_A > lower & st_A <= upper);
-        binned_B(i) = sum(st_B > lower & st_B <= upper);
-    end 
+%     binned_A = -1*ones(1, length(bin_edges)-1); % initialize to -1 so can tell when updated with counts 
+%     binned_B = -1*ones(1, length(bin_edges)-1);
+%     for i = 1:length(bin_edges) - 1
+%         lower = bin_edges(i);
+%         upper = bin_edges(i+1);
+%         binned_A(i) = sum(st_A > lower & st_A <= upper);
+%         binned_B(i) = sum(st_B > lower & st_B <= upper);
+%     end 
+%     
+
+    binned_A = histc(double(st_A), bin_edges);
+    binned_B = histc(double(st_B), bin_edges);
     
     binned_A = binned_A >= 1; %turn back into 1, 0
     binned_B = binned_B >= 1;
     
-    %% correlation: 1) compute initial correlation 2) add more 3) recalculate correlation to check ??
+    %% correlation: 1) compute initial correlation 2) add more 3) recalculate correlation to check
     
     % zeroth lag cross correlation - only one time bin
-    % xcorr
-    
-    max_lag = 50e-3;
-    lag_units = max_lag/1e-3;
-    
     % want to compute noise correlation or zero lag cross correlation
     
-    initial_corr = xcorr(double(st_A), double(st_B), 0, 'coeff');
+    initial_corr = xcorr(double(binned_A), double(binned_B), 0, 'coeff');
     
     % below is started but not finished nor debugged
 %     while initial_corr ~= c_desired
