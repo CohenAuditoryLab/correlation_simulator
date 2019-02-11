@@ -122,13 +122,9 @@ for iter=1:1 %Number_of_pairs
 %         binned_A(i) = sum(st_A > lower & st_A <= upper);
 %         binned_B(i) = sum(st_B > lower & st_B <= upper);
 %     end 
-%     
 
-    binned_A = histc(double(st_A), bin_edges);
-    binned_B = histc(double(st_B), bin_edges);
-    
-    binned_A = binned_A >= 1; %turn back into 1, 0
-    binned_B = binned_B >= 1;
+    binned_A = histc(double(st_A), bin_edges) >= 1;
+    binned_B = histc(double(st_B), bin_edges) >= 1;
     
     %% correlation: 1) compute initial correlation 2) add more 3) recalculate correlation to check
     
@@ -138,18 +134,24 @@ for iter=1:1 %Number_of_pairs
     initial_corr = xcorr(double(binned_A), double(binned_B), 0, 'coeff');
     
     % below is started but not finished nor debugged
-%     while initial_corr ~= c_desired
-%         if initial_corr < c_desired % add correlation
-%             jitter = randn(1, length(st_B) - d);
-%             jitter = floor(max(diff(st_B)) * jitter);
-%             st_B = st_B + [jitter'; zeros(d)];
-%         elseif initial_corr > c_desired % remove correlation
-%             continue; % placeholder: TODO
-%         else % do nothing
-%             continue;
-%         end
-%         initial_corr = xcorr(double(st_A), double(st_B), 0, 'coeff');
-%     end
+    while initial_corr ~= c_desired
+        disp('loop');
+        if initial_corr < c_desired % add correlation
+            d = floor(initial_corr * length(st_B)); % number of samples already correlated
+            jitter = randn(1, length(st_B) - d);
+            jitter = floor(min(diff(double(st_B))) .* jitter);
+            ordering = randperm(length(jitter) + d);
+            st_B = double(st_B) + squeeze(permute([jitter, zeros(1, d)], ordering));
+            st_B = int64(st_B);
+        elseif initial_corr > c_desired % remove correlation
+            continue; % placeholder: TODO
+        else % do nothing
+            continue;
+        end
+        binned_A = histc(double(st_A), bin_edges) >= 1;
+        binned_B = histc(double(st_B), bin_edges) >= 1;
+        initial_corr = xcorr(double(binned_A), double(binned_B), 0, 'coeff');
+    end
 %     % Save pair
     
 end
