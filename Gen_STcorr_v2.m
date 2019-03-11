@@ -1,20 +1,24 @@
 function Gen_STcorr_v2(desired_c, Number_of_pairs)
-%GEN_CST_ISI Generates inputed number of spike train pairs with varying
-%levels of contamination.  Multiples of ten recomended.
+%GEN_STcorr_v2 Generates inputed number of spike train pairs with desired
+%pairwise cross-correlation.
+%LAST EDITED: B. Karpowicz 3/11/19
 
-%   Divides numbers of trains by 10 and does sweep from 0-10, 11-20, 21-30
-%   etc. all the way up to 100% contamination.  Saves each train into
-%   folder for these to be analyzed for ISI violiations
+% INPUTS 
+%   desired_c : a vector of desired pairwise correlations for each pair of
+%   neurons, such that desired_c(i) is the desired correlation for the ith
+%   pair. If desired_c is not of length Number_of_pairs, the vector is
+%   repeated using repmat until it reaches this length. Recommended
+%   correlations ~0.1-0.2.
+% 
+%   Number_of_pairs : an integer number of the desired pairs of neurons to
+%   be generated 
 
-%UPDATE: Should save firing rate too
+if length(desired_c) ~= Number_of_pairs
+    num_reps = ceil(Number_of_pairs/length(desired_c));
+    desired_c = repmat(desired_c, 1, num_reps);
+    desired_c = desired_c(1:Number_of_pairs);
+end 
 
-% if mod(Number_of_pairs,10)~=0
-%
-%     Number_of_pairs= input('change to number divisible by 10')
-%
-% end
-
-% Train_in_group=Number_of_pairs/10;
 Train_in_group = 1;
 
 contam_vec=[linspace(0,.1,Train_in_group)...
@@ -32,13 +36,13 @@ dat = load('simulation_parameters');
 fs  = dat.fs; % sampling rate
 wav = dat.waves; % mean waveforms for all neurons
 
-
 %% Start Loop
 
-final_corrs = zeros(1, Number_of_pairs);
-pairs = cell(2, Number_of_pairs+1);
-pairs{1, 1} = 'A';
-pairs{2, 1} = 'B';
+pairs = cell(Number_of_pairs, 4);
+pairs{1,1} = 'A';
+pairs{1,2} = 'B';
+pairs{1,3} = 'actual corr';
+pairs{1,4} = 'desired corr';
 
 for iter=1:Number_of_pairs
     
@@ -150,13 +154,13 @@ for iter=1:Number_of_pairs
         
     else %standard protocol
         
-        tolerance = 0.0005;
+        tolerance = 0.001;
         
-        while initial_corr < desired_c - tolerance;
+        while initial_corr < desired_c(ID) - tolerance;
             
-            disp(['Correlation:' num2str(initial_corr)]);
+            disp(['Correlation: ' num2str(initial_corr)]);
             
-            n2add=floor(abs((desired_c-initial_corr))*numel(st_B));% subtract out percent already overlap...usually so small this won' t matter but just in case
+            n2add=floor(abs((desired_c(ID)-initial_corr))*numel(st_B));% subtract out percent already overlap...usually so small this won' t matter but just in case
             % How many spikes are we adding over
             
             act_per=n2add/numel(st_B); %store actual percentage since rounding
@@ -194,18 +198,17 @@ for iter=1:Number_of_pairs
     end
     
     disp(['Stopping Correlation: ' num2str(initial_corr)]);
-    final_corrs(ID) = initial_corr;
-    pairs{1, ID+1} = binned_A;
-    pairs{2, ID+1} = binned_B;
-    
+    pairs{ID+1, 1} = binned_A;
+    pairs{ID+1, 2} = binned_B;
+    pairs{ID+1, 3} = initial_corr;
+    pairs{ID+1, 4} = desired_c(ID);
 end
+
+%%
 
 directory = '/Users/briannakarpowicz/Documents/CohenLab/contamination_and_simulations_2017and18-master/Critical_Functions_and_Files/';
 
-save([directory num2str(ID) '_pairs'], 'final_corrs', 'pairs');
-%     % '_'  num2str(floor(contam_vec(ID)*100))] removed this since it makes
-%     % it much harder to call files and percent contam is stored in file
-%     % anyways
+save([directory num2str(ID) '_pairs'], 'pairs');
 
 end
 
