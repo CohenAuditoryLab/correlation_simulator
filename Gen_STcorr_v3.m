@@ -1,8 +1,10 @@
-function Gen_STcorr_v3(desired_c, Number_of_pairs)
+function trainlength = Gen_STcorr_v3(desired_c, Number_of_pairs)
 %GEN_STcorr_v2 Generates inputed number of spike train pairs with desired
 %pairwise cross-correlation.
 %LAST EDITED: B. Karpowicz 3/18/19
 
+% 3/21/19: save firing rates 
+        
 % 3/18/19: if desired correlation cannot be reached within tolerance after 100
 % iterations, return the maximum correlation reached. Fixed correlation
 % bug.
@@ -39,6 +41,7 @@ contam_vec=[linspace(0,.1,Train_in_group)...
     linspace(.71,.80,Train_in_group)...
     linspace(.81,.90,Train_in_group)...
     linspace(.91,1,Train_in_group)]';
+contam_vec = repmat(contam_vec, 1, ceil(Number_of_pairs*2/10));
 
 dat = load('simulation_parameters');
 fs  = dat.fs; % sampling rate
@@ -53,6 +56,7 @@ pairs{1,3} = 'actual corr';
 pairs{1,4} = 'desired corr';
 
 spikes = cell(Number_of_pairs*2, 1);
+all_fr = zeros(1, 2*Number_of_pairs);
 
 for iter=1:Number_of_pairs
     
@@ -88,6 +92,9 @@ for iter=1:Number_of_pairs
     
     NN = size(wav,3); % number of neurons %should be same as nn...curious why they did this again
     fr = fr_bounds(1) + (fr_bounds(2)-fr_bounds(1)) * rand(NN,1); % create variability in firing rates % uses uniform scale rather than shift 0 to diff between bounds
+    
+    all_fr(2*ID - 1) = fr(1);
+    all_fr(2*ID) = fr(2);
     
     spk_times = [];
     clu = [];
@@ -185,7 +192,7 @@ for j = 1:Number_of_pairs
         tolerance = 0.001;
         num_iters = 0;
         
-        while initial_corr < desired_c(j) - tolerance & num_iters < 100
+        while initial_corr < desired_c(j) - tolerance & num_iters < 25
             
             disp(['Correlation: ' num2str(initial_corr)]);
             
@@ -254,10 +261,11 @@ for i = 1:Number_of_pairs*2
 end 
         
 %%
+trainlength = length(binned_A);
 
 directory = '/Users/briannakarpowicz/Documents/CohenLab/contamination_and_simulations_2017and18-master/Critical_Functions_and_Files/';
 
-save([directory num2str(ID) '_pairs'], 'pairs', 'corrs');
+save([directory num2str(ID) '_pairs'], 'pairs', 'corrs', 'all_fr', 'spikes');
 
 end
 
