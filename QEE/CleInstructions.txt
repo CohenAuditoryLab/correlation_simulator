@@ -1,0 +1,48 @@
+-oTo run it you have to use the two command:
+For compiling:
+>  g++ mainQEE.cpp qEpitopeEval.cpp monteCarlo.cpp io.cpp tools.cpp -O3 -o qee.out
+
+For executing:
+> ./qee.out -i (path to coupling file, omitting the final .j) -o (desired output path)
+Here, you can add the option -p2 to also get the correlations in one of the output files.
+
+./qee.out -i p7-out -o p7-sim
+
+As you mentioned it, you have to provide an input file .j with the Ising model parameters. If you have no-idea what this is, we can discuss quickly next week.
+In the meanwhile, here is how the file is constructed. Suppose you have n=9 neurons, 
+     -- the each of the 9 first lines of the file provides the values of the "fields" (drive on each neurons) --> h_i;
+     -- the 36 = 9*8/2 next lines provides the values of the strength of the pairwise interactions between each two neurons --> J_ij;
+For instance:
+   h_1
+   h_2
+   ....
+   h_9
+   J_12
+   J_13
+   ...
+   J_19
+   J_23
+   ...
+  J_29
+   etc. up to 
+   J_89
+
+the "fields" h_i are the drive on each neurons to fire:
+   h_i > 0  --> the neurons will tend to fire more than on half of the datapoints
+   h_i < 0  --> the neurons will tend to fire less than on half of the datapoints
+
+the strength of the pairwise interaction J_ij tells how the two neurons i and j tend to behave in pair:
+   J_ij > 0   --> neurons i and j tend to behave similarly: they are driven to fire at the same time and be silent at the same time
+   J_ij < 0  --> neurons i and j tend to behave oppositely: they are driven to fire at different time
+
+You will find attached 3 examples:
+   -- Ex1. with 9 neurons but zero parameters (--> noise), which should create a dataset with just noise.
+   -- Ex2. with 9 independent neurons: there's a non zero values for h1 to h9, but all the J_ij are zero (no correlation)
+   -- Ex3. with 9 neurons with a correlation between neurons 1 and 3 (J_13) and between neurons 2 and 4 (J24)
+
+There are two output files:
+   -- output--1.dat  that contains the generated dataset with the parameters you have provided in the .j file
+The file has N=1000000=1e6 datapoints. You can increase the number of datapoints you to generate by using the option -mcr 
+ For instance -mcr 10, will create a file of 10*N datapoints, where N=1e6.
+
+   -- output.p  which contains the values of some one point and two points correlations: right now, I'm not sure which correlation this is outputting..... , I'll check that later. But I have checked directly on the generated dataset that the neurons have a the correct firing rate (given the parameters h_i that was provided) and that the chosen neurons are actually properly correlated (given the parameters J_ij that was provided). The precision is not the one I was expected, but it is still ok.

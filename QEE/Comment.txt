@@ -1,0 +1,15 @@
+
+Here is John Barton's MCMC code for generating simulated data via a model.  The following are his instructions.
+
+~~
+I've attached here a zip file with some simple code that does MC sampling and outputs the configurations/correlations. By default it outputs all sampled configurations and the one-point correlations. To compile and run the code, you can use:
+
+> g++ mainQEE.cpp qEpitopeEval.cpp monteCarlo.cpp io.cpp tools.cpp -O3 -o qee.out
+> ./qee.out -i (path to coupling file, omitting the final .j) -o (desired output path)
+
+If you would like to also output the two-point correlations, you can also add the flag "-p2" when running qee. 
+
+And if it might be of interest, it is possible to "freeze" part of the configuration in a desired state and MC sample the rest. The input for this is a bit complicated, but let me know if you'd like to give this a try. And if you run into any trouble with the code, please send a message as well.
+
+Best,
+John
