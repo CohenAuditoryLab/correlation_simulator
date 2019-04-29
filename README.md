@@ -1,6 +1,8 @@
 # correlation_simulator
 Creating simulated spike trains with known amount of correlation and comparing their results to ACE fits.
 
+Gen_STcorr_v3 first generates a set of pairs of neurons with known correlations and saves the spike times of these neurons as well as the 20ms bins in which they spike, their firing rates, and an upper triangular cross-correlation matrix across all generated neurons. This data is fed into convert_data_to_mat which takes the spike time data and formats it into a .dat file for fitting. Then, WriteCMSAbin is called, which writes the .p file (amongst others) for fitting. The ACE repository is called, which produces the .j file of parameters. Finally, the same .j file is fed into QEE, to see what data our fitted file outputs. Finally, the .dat file produced by QEE is compared to our original .dat file. 
+
 TO RUN: Run IsingTestPipeline.m
 
   Within IsingTestPipeline.m, you can set parameters.
