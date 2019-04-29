@@ -55,6 +55,5 @@ end
 
 %% Compare sim--1 and original 1_pairs 
 
-RMSE = compare_results(filename);
-disp(['RMSE: ' num2str(RMSE)]);
+RMSE = compare_results(file)
 
