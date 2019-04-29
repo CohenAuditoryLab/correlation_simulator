@@ -15,7 +15,7 @@ TO RUN: Run IsingTestPipeline.m
     
     Lines 32,33: fill in path to ACE repository on your computer.
     
-    Lines 46, 49: fill in path to QEE repository on your computer.
+    Lines 46,49: fill in path to QEE repository on your computer.
 
 The ACE Repository can be found here: https://github.com/johnbarton/ACE
 
