@@ -16,6 +16,9 @@ TO RUN: Run IsingTestPipeline.m
     Lines 46, 49: fill in path to QEE repository on your computer.
 
 The ACE Repository can be found here: https://github.com/johnbarton/ACE
+
   Within this repository, the scripts 'WriteCMSA' and 'WriteCMSAbin' can be found in the directory 'scripts'.
+  
 The QEE Repository was obtained from Cle Demu.
+
 Examples running it on our data in Matlab can be found here: https://github.com/CohenAuditoryLab/auditory-ising/tree/master/ACE/running
