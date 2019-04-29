@@ -1,5 +1,12 @@
 function convert_data_to_dat(file, fraction)
-%% File is the name of the .mat file produced from Gen_STcorr_v3
+%%
+
+% FILE: the name of the file produced by Gen_STcorr_v3 that needs to be
+% converted to .dat format for ACE fitting.
+
+% FRACTION: the percentage of data to be saved for ACE fitting, from t=0.
+
+%% 
     pieces = strsplit(file, '.');
     savename = pieces{1};
 
